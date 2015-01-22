@@ -1,6 +1,6 @@
 <?php
 
-namespace demetrio\adds\components;
+namespace demetrio77\adds\assets;
 
 use yii\web\AssetBundle;
 
