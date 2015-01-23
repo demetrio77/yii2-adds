@@ -28,7 +28,16 @@ class ActiveField extends \yii\widgets\ActiveField
         $defaultEmptyPk = '0';
         $defaultEmptyValue = '';
         $where = [];
+        $autoComplete = false;
         
+    	$style = 'padding:0; border:0;';
+    	if (!isset($options['style']))
+    		$options['style'] = $style;
+    	else
+    		$options['style'] .= $style;
+    	
+    	$options = array_merge($this->inputOptions, $options);
+
     	foreach ($params as $property => $value) {
     		if (isset($$property)) $$property = $value;
     	}
@@ -49,6 +58,14 @@ class ActiveField extends \yii\widgets\ActiveField
     			$lookupModelPk,
     			$lookupModelField
     	);
+    	
+    	if ($autoComplete) {
+    		$view = Yii::$app->getView();
+    		\backend\assets\Select2Asset::register( $view );
+    		$id = Html::getInputId($this->model, $this->attribute);    		 
+    		$js = "$(document).ready(function(){ $('#".$id."').select2({}); });";
+    		$view->registerJs($js);
+    	}
     
     	if ($allowEmpty) {
     		$items = \yii\helpers\ArrayHelper::merge([$defaultEmptyPk => $defaultEmptyValue], $items);
@@ -94,6 +111,29 @@ class ActiveField extends \yii\widgets\ActiveField
     	$view->registerJs("$('#".$id."').ckeditor();");
     	return $this->textarea( $options );
     }
+    
+    /*public function dropDownAutoComplete( $items = [], $options =[])
+    {
+    	$style = 'padding:0; border:0;';
+    	if (!isset($options['style']))
+    		$options['style'] = $style;
+    	else
+    		$options['style'] .= $style;
+    	
+    	$options = array_merge($this->inputOptions, $options);
+    	
+    	$this->adjustLabelFor($options);
+    	
+    	$view = Yii::$app->getView();
+    	\backend\assets\Select2Asset::register( $view );
+    	$id = Html::getInputId($this->model, $this->attribute);
+    	
+    	$js = "$(document).ready(function(){ $('#".$id."').select2({}); });";
+    	$this->parts['{input}'] = Html::activeDropDownList($this->model, $this->attribute, $items, $options);//$this->model, $this->attribute, $options);
+    	$view->registerJs($js);
+    	
+    	return $this;    	
+    }*/
     
     public function dropDownMultiple( $items = [], $options = [], $tags = false)
     {
