@@ -6,6 +6,7 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use backend\assets\DateDropDownAsset;
 //use backend\components\behaviors\ImageUploadBehavior;
 
 class ActiveField extends \yii\widgets\ActiveField
@@ -101,6 +102,31 @@ class ActiveField extends \yii\widgets\ActiveField
     	return $this;
     }
     
+    public function dateDropDown( $options = [])
+    {
+    	$opts = [];
+    	if (isset($options['minYear'])) {
+    		$opts[] = "minYear: ".$options['minYear'];
+    		unset($options['minYear']);
+    	}
+    	if (isset($options['maxYear'])) {
+    		$opts[] = "maxYear: ".$options['maxYear'];
+    		unset($options['maxYear']);
+    	}
+    	if (isset($options['defaultDate'])) {
+    		$opts[] = "defaultDate: ".$options['defaultDate'];
+    		unset($options['defaultDate']);
+    	}
+    	
+    	$id = Html::getInputId($this->model, $this->attribute).'Div';
+    	$view = Yii::$app->getView();
+    	DateDropDownAsset::register($view);
+    	$view->registerJs("$('#".$id."').dateDropDown(".($opts?"{".implode(',', $opts)."}":'').");");    	
+    	$this->parts['{input}'] = '<div id="'.$id.'" class="row">'.Html::activeHiddenInput($this->model, $this->attribute, $options).'</div>';
+    	
+    	return $this;
+    }
+    
     public function ckEditor ( $options = [])
     {
     	$view = Yii::$app->getView();
@@ -112,28 +138,16 @@ class ActiveField extends \yii\widgets\ActiveField
     	return $this->textarea( $options );
     }
     
-    /*public function dropDownAutoComplete( $items = [], $options =[])
+    public function dropDownListAutoComplete($items, $options = [])
     {
-    	$style = 'padding:0; border:0;';
-    	if (!isset($options['style']))
-    		$options['style'] = $style;
-    	else
-    		$options['style'] .= $style;
-    	
-    	$options = array_merge($this->inputOptions, $options);
-    	
-    	$this->adjustLabelFor($options);
-    	
     	$view = Yii::$app->getView();
     	\backend\assets\Select2Asset::register( $view );
     	$id = Html::getInputId($this->model, $this->attribute);
-    	
-    	$js = "$(document).ready(function(){ $('#".$id."').select2({}); });";
-    	$this->parts['{input}'] = Html::activeDropDownList($this->model, $this->attribute, $items, $options);//$this->model, $this->attribute, $options);
+    	$js = "$('#".$id."').select2({});";
     	$view->registerJs($js);
     	
-    	return $this;    	
-    }*/
+    	return $this->dropDownList($items, $options);
+    }
     
     public function dropDownMultiple( $items = [], $options = [], $tags = false)
     {
@@ -148,12 +162,12 @@ class ActiveField extends \yii\widgets\ActiveField
         	$view = Yii::$app->getView();
         	\backend\assets\Select2Asset::register( $view );
         	$id = Html::getInputId($this->model, $this->attribute);
-        	$js = "$(document).ready(function(){
+        	$js = "
     	       $('#".$id."').select2({
     	       		tags:['".implode("','", $items)."'],
                     tokenSeparators: [',']
         		});
-    	    });";
+    	    ";
         	$this->parts['{input}'] = Html::activeTextInput($this->model, $this->attribute, $options);
         	$view->registerJs($js);
         } else {
