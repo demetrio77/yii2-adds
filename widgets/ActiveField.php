@@ -6,7 +6,6 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use backend\assets\DateDropDownAsset;
 //use backend\components\behaviors\ImageUploadBehavior;
 
 class ActiveField extends \yii\widgets\ActiveField
@@ -104,26 +103,7 @@ class ActiveField extends \yii\widgets\ActiveField
     
     public function dateDropDown( $options = [])
     {
-    	$opts = [];
-    	if (isset($options['minYear'])) {
-    		$opts[] = "minYear: ".$options['minYear'];
-    		unset($options['minYear']);
-    	}
-    	if (isset($options['maxYear'])) {
-    		$opts[] = "maxYear: ".$options['maxYear'];
-    		unset($options['maxYear']);
-    	}
-    	if (isset($options['defaultDate'])) {
-    		$opts[] = "defaultDate: ".$options['defaultDate'];
-    		unset($options['defaultDate']);
-    	}
-    	
-    	$id = Html::getInputId($this->model, $this->attribute).'Div';
-    	$view = Yii::$app->getView();
-    	DateDropDownAsset::register($view);
-    	$view->registerJs("$('#".$id."').dateDropDown(".($opts?"{".implode(',', $opts)."}":'').");");    	
-    	$this->parts['{input}'] = '<div id="'.$id.'" class="row">'.Html::activeHiddenInput($this->model, $this->attribute, $options).'</div>';
-    	
+    	$this->parts['{input}'] = Html::activeDateDropDown($this->model, $this->attribute, $options);
     	return $this;
     }
     
