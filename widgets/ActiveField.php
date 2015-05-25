@@ -90,7 +90,10 @@ class ActiveField extends \yii\widgets\ActiveField
     
     public function dateInput( $options = [])
     {
-    	$this->inputOptions['class'] .= ' datepicker';
+    	$view = Yii::$app->getView();
+        \demetrio77\adds\assets\DatePickerAsset::register( $view );
+        
+        $this->inputOptions['class'] .= ' datepicker';
     	$options['data-dateformat'] = "yy-mm-dd";
 
     	$options = array_merge($this->inputOptions, $options);
@@ -154,6 +157,11 @@ class ActiveField extends \yii\widgets\ActiveField
         	$this->parts['{input}'] = Html::activeDropDownMultiple($this->model, $this->attribute, $items, $options);
         }
         return $this;
+    }
+    
+    public function dateTimeInput()
+    {
+    	
     }
     
    /* public function imageInput( $options = [] )

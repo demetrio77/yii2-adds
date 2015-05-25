@@ -10,11 +10,13 @@ class DateHelper
 	private static $monthsRod = [
 		'','января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'
 	];
-	public static function month($i) {
+	public static function month($i) 
+	{
 		$i = intval($i);
 		return isset(self::$months[$i])?self::$months[$i]:'';
 	}
-	public static function mysqlDate($date) {
+	public static function mysqlDate($date) 
+	{
 		$date = self::clearDate($date);
 		$d = explode('-', $date);
 		switch (count($d)) {
@@ -33,7 +35,8 @@ class DateHelper
 		return '';		
 	}
 	
-	public static function mysqlShortDate($date) {
+	public static function mysqlShortDate($date) 
+	{
 		$date = self::clearDate($date);
 		$d = explode('-', $date);
 		if (count($d)==3) {
@@ -42,12 +45,28 @@ class DateHelper
 		return '';
 	}
 	
-	public static function unixDate($u) {
+	public static function unixDate($u) 
+	{
 		return date('j',$u).' '.self::month(date('n',$u)).' '.date('Y',$u);
 	}
 	
-	public static function unixShortDate($u) {
+	public static function unixShortDate($u) 
+	{
 		return date('d.m.Y',$u);
+	}
+	
+	public static function mysqlToUnix($date)
+	{
+		$d = explode('-', $date);
+		if (count($d)!=3) return false;
+		return mktime(0,0,0,intval($d[1]),intval($d[2]),intval($d[0]));
+	}	
+	
+	public static function ruToUnix($date)
+	{
+		$d = explode('.', $date);
+		if (count($d)!=3) return false;
+		return mktime(0,0,0,intval($d[1]),intval($d[0]),intval($d[2]));
 	}
 	
 	private static function clearDate( $date )
