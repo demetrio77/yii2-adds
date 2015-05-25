@@ -49,8 +49,8 @@ class ActiveField extends \yii\widgets\ActiveField
     	       ->orderBy($lookupModelField);
     
     	if ($where) {
-    		foreach ($where as $where)
-    			$query->andWhere( $where );
+    		foreach ($where as $w)
+    			$query->andWhere( $w );
     	}
     
     	$items = ArrayHelper::map(
@@ -123,13 +123,34 @@ class ActiveField extends \yii\widgets\ActiveField
     
     public function dropDownListAutoComplete($items, $options = [])
     {
+    	$showHints = false;
+    	
+    	if (isset($options['hints'])) {
+    		$h = $options['hints'];
+    		$hints = [];
+    		foreach ($h as $key => $val) {
+    			$hints[$key] = ['data-hint' => $val ];
+    		}
+    		unset( $options['hints']);
+    		$showHints = true;
+    	}
+    	
     	$view = Yii::$app->getView();
-    	\backend\assets\Select2Asset::register( $view );
+    	\demetrio77\adds\assets\Select2Asset::register( $view );
     	$id = Html::getInputId($this->model, $this->attribute);
-    	$js = "$('#".$id."').select2({});";
+
+    	$js = "$('#".$id."').select2({".($showHints ? "
+		    formatResult: format,
+			formatSelection: format":'')."
+		});
+		".($showHints ? "
+		function format(state) {
+			var originalOption = state.element;
+			return state.text+\"<br /><span style=\'font-size:80%\'>\"+$(originalOption).data(\"hint\")+\"</span>\";			
+		}" : "");
     	$view->registerJs($js);
     	
-    	return $this->dropDownList($items, $options);
+    	return $this->dropDownList($items, ArrayHelper::merge($options, [ 'options' => $hints ]));
     }
     
     public function dropDownMultiple( $items = [], $options = [], $tags = false)
@@ -157,11 +178,6 @@ class ActiveField extends \yii\widgets\ActiveField
         	$this->parts['{input}'] = Html::activeDropDownMultiple($this->model, $this->attribute, $items, $options);
         }
         return $this;
-    }
-    
-    public function dateTimeInput()
-    {
-    	
     }
     
    /* public function imageInput( $options = [] )
