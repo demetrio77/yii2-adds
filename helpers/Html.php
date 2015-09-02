@@ -3,62 +3,66 @@
 namespace yii\helpers;
 
 use Yii;
-use demetrio77\adds\widgets\JarvisWidget;
 
 class Html extends BaseHtml
 {
-	public static $formNoWidget=false;
-	
-	public static function beginForm($action = '', $method = 'post', $options = [])
+	public static function radio($name, $checked = false, $options = [])
 	{
-		if (isset($options['nowidget'])) {
-			self::$formNoWidget = true;
-			return parent::beginForm($action, $method, $options);
+		$options['checked'] = (bool) $checked;
+		$value = array_key_exists('value', $options) ? $options['value'] : '1';
+		if (isset($options['uncheck'])) {
+			// add a hidden field so that if the radio button is not selected, it still submits a value
+			$hidden = static::hiddenInput($name, $options['uncheck']);
+			unset($options['uncheck']);
+		} else {
+			$hidden = '';
 		}
-		JarvisWidget::begin(['title'=>isset($options['title'])?$options['title']:'']);
-		return parent::beginForm($action, $method, $options);
+		if (isset($options['label'])) {
+			$label = $options['label'];
+			$labelOptions = isset($options['labelOptions']) ? $options['labelOptions'] : [];
+			unset($options['label'], $options['labelOptions']);
+			/*
+			 * добавлено
+			 */if (isset($options['class']) && $options['class']=='styled') {
+				$options['id'] = 'radio-'.$name.'-'.$value;
+				$content = static::input('radio', $name, $value, $options).' '.static::label($label, $options['id'], $labelOptions);
+			}
+			else {/* до сюда */
+				$content = static::label(static::input('radio', $name, $value, $options) . ' ' . $label, null, $labelOptions);
+			}
+			return $hidden . $content;
+		} else {
+			return $hidden . static::input('radio', $name, $value, $options);
+		}
 	}
 	
-	public static function endForm() 
+	public static function checkbox($name, $checked = false, $options = [])
 	{
-		if (self::$formNoWidget) {
-			self::$formNoWidget = false;
-			return parent::endForm();
+		$options['checked'] = (bool) $checked;
+		$value = array_key_exists('value', $options) ? $options['value'] : '1';
+		if (isset($options['uncheck'])) {
+			// add a hidden field so that if the checkbox is not selected, it still submits a value
+			$hidden = static::hiddenInput($name, $options['uncheck']);
+			unset($options['uncheck']);
+		} else {
+			$hidden = '';
 		}
-		echo parent::endForm();
-		JarvisWidget::end();
-	}
-	
-	public static function activeDropDownMultiple($model, $attribute, $items = [], $options = [])
-	{
-		$view = Yii::$app->getView();
-		\backend\assets\Select2Asset::register( $view );
-		$id = self::getInputId($model, $attribute);
-		$view->registerJs("$('#".$id."').select2();");
-		$options['multiple'] = true;
-		$options['style'] = 'padding:0; border:0;';
-		return static::activeListInput('dropDownList', $model, $attribute, $items, $options);
-	}
-	
-	public static function activeDateDropDown($model, $attribute, $options = [])
-	{
-		$opts = [];
-		if (isset($options['minYear'])) {
-			$opts[] = "minYear: ".$options['minYear'];
-			unset($options['minYear']);
+		if (isset($options['label'])) {
+			$label = $options['label'];
+			$labelOptions = isset($options['labelOptions']) ? $options['labelOptions'] : [];
+			unset($options['label'], $options['labelOptions']);
+			/*
+			 * добавлено
+			*/if (isset($options['class']) && $options['class']=='styled') {
+				$options['id'] = 'check-'.$name.'-'.$value;
+				$content = static::input('checkbox', $name, $value, $options).' '.static::label($label, $options['id'], $labelOptions);
+			}
+			else {/* до сюда */
+				$content = static::label(static::input('checkbox', $name, $value, $options) . ' ' . $label, null, $labelOptions);
+			}
+			return $hidden . $content;
+		} else {
+			return $hidden . static::input('checkbox', $name, $value, $options);
 		}
-		if (isset($options['maxYear'])) {
-			$opts[] = "maxYear: ".$options['maxYear'];
-			unset($options['maxYear']);
-		}
-		if (isset($options['defaultDate'])) {
-			$opts[] = "defaultDate: ".$options['defaultDate'];
-			unset($options['defaultDate']);
-		}
-		$id = Html::getInputId($model, $attribute).'Div';
-		$view = Yii::$app->getView();
-		\backend\assets\DateDropDownAsset::register($view);
-		$view->registerJs("$('#".$id."').dateDropDown(".($opts?"{".implode(',', $opts)."}":'').");");
-		return '<div id="'.$id.'" class="row">'.static::activeHiddenInput($model, $attribute, $options).'</div>';
 	}
 }

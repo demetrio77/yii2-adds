@@ -6,11 +6,12 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use site\assets\StarRatingAsset;
 //use backend\components\behaviors\ImageUploadBehavior;
 
 class ActiveField extends \yii\widgets\ActiveField
 {
-    /**
+	/**
      * Селект с данными из связанной модели
      * @param string $lookupModelName
      * @param string $lookupModelField
@@ -124,15 +125,22 @@ class ActiveField extends \yii\widgets\ActiveField
     public function dropDownListAutoComplete($items, $options = [])
     {
     	$showHints = false;
+    	$hints = [];
     	
     	if (isset($options['hints'])) {
     		$h = $options['hints'];
-    		$hints = [];
     		foreach ($h as $key => $val) {
     			$hints[$key] = ['data-hint' => $val ];
     		}
     		unset( $options['hints']);
     		$showHints = true;
+    	}
+    	
+    	if (isset($options['style'])) {
+    		$options['style'].= '; padding:0;';
+    	}
+    	else {
+    		$options['style'] = 'padding:0;';
     	}
     	
     	$view = Yii::$app->getView();
@@ -178,6 +186,38 @@ class ActiveField extends \yii\widgets\ActiveField
         	$this->parts['{input}'] = Html::activeDropDownMultiple($this->model, $this->attribute, $items, $options);
         }
         return $this;
+    }
+    
+    public function markInput($options=[])
+    {
+    	$view = Yii::$app->getView();
+    	StarRatingAsset::register( $view );
+    	
+    	$this->inputOptions['class'] .= ' rating';
+    	if (!isset($options['min'])) {
+    		$options['min'] = 0;
+    	}
+    	if (!isset($options['max'])) {
+    		$options['max'] = 5;
+    	}
+    	if (!isset($options['step'])) {
+    		$options['step'] = 1;
+    	}
+    	if (!isset($options['disabled'])) {
+    		$options['disabled'] = false;
+    	}
+    	
+    	$options['data']['size'] = isset($options['size'])?$options['size']:'lg';
+    	
+    	$options['type'] = 'number';
+    	$options['data']['show-clear']=false;
+    	$options['data']['show-caption']=false;
+    	
+    	$options = array_merge($this->inputOptions, $options);
+    	$this->adjustLabelFor($options);
+    	 
+    	$this->parts['{input}'] = Html::activeTextInput($this->model, $this->attribute, $options);
+    	return $this;
     }
     
    /* public function imageInput( $options = [] )
