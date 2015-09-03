@@ -69,6 +69,13 @@ class DateHelper
 		return mktime(0,0,0,intval($d[1]),intval($d[0]),intval($d[2]));
 	}
 	
+	public static function ruToMysql($date)
+	{
+		$d = explode('.', $date);
+		if (count($d)!=3) return false;
+		return $d[2].'-'.$d[1].'-'.$d[0];
+	}
+	
 	private static function clearDate( $date )
 	{
 		$d = explode('-', $date);
